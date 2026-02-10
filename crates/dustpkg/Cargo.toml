@@ -1,0 +1,21 @@
+[package]
+name = "dustpkg"
+version = "0.1.0"
+edition = "2021"
+description = "Dust package manager with reproducible builds baked in"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.4", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+sha2 = "0.10"
+rand = { version = "0.8", features = ["std"] }
+rand_chacha = "0.3"
+thiserror = "1.0"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+tempfile = "3.4"
+predicates = "3.0"
