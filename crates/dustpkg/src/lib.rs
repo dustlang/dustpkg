@@ -38,12 +38,19 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 /// Metadata about the current package defined in `Dust.toml`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct PackageInfo {
     /// Name of the package.
     pub name: String,
     /// Version of the package.
     pub version: String,
+    /// DPL specification version (v0.1 or v0.2)
+    #[serde(default = "default_dpl_version")]
+    pub dpl_version: String,
+}
+
+fn default_dpl_version() -> String {
+    "0.2".to_string()
 }
 
 /// Manifest structure for `Dust.toml`.
@@ -67,8 +74,8 @@ impl Manifest {
 
     /// Save the manifest to the given path.
     pub fn save(&self, path: &Path) -> Result<()> {
-        let toml_string = toml::to_string_pretty(self)
-            .context("failed to serialize manifest to TOML")?;
+        let toml_string =
+            toml::to_string_pretty(self).context("failed to serialize manifest to TOML")?;
         fs::write(path, toml_string)
             .with_context(|| format!("failed to write manifest at {}", path.display()))?;
         Ok(())
@@ -109,8 +116,8 @@ impl Lockfile {
 
     /// Save the lock file to disk.
     pub fn save(&self, path: &Path) -> Result<()> {
-        let toml_string = toml::to_string_pretty(self)
-            .context("failed to serialize lock file to TOML")?;
+        let toml_string =
+            toml::to_string_pretty(self).context("failed to serialize lock file to TOML")?;
         fs::write(path, toml_string)
             .with_context(|| format!("failed to write lock file at {}", path.display()))?;
         Ok(())
@@ -175,6 +182,7 @@ pub fn init_package(dir: &Path) -> Result<()> {
         package: PackageInfo {
             name: name.to_string(),
             version: "0.1.0".to_string(),
+            dpl_version: "0.2".to_string(),
         },
         dependencies: HashMap::new(),
     };
@@ -207,6 +215,31 @@ pub fn add_dependency(
         dep_version,
         lock_path.display()
     );
+    Ok(())
+}
+
+/// Add the standard library dependencies (dustlib and optionally dustlib_k for v0.2).
+/// This is called automatically for v0.2 projects to ensure K-regime support.
+pub fn add_stdlib_dependencies(manifest_path: &Path, seed: Option<u64>) -> Result<()> {
+    let mut manifest = Manifest::load(manifest_path)?;
+
+    // Always add dustlib (core library)
+    manifest
+        .dependencies
+        .insert("dustlib".to_string(), "0.2.0".to_string());
+
+    // Add dustlib_k for v0.2 projects
+    if manifest.package.dpl_version == "0.2" {
+        manifest
+            .dependencies
+            .insert("dustlib_k".to_string(), "0.2.0".to_string());
+    }
+
+    manifest.save(manifest_path)?;
+    let lock = resolve(&manifest, seed);
+    let lock_path = manifest_path.with_file_name("dustpkg.lock");
+    lock.save(&lock_path)?;
+    println!("Added standard library dependencies (dustlib, dustlib_k)");
     Ok(())
 }
 
