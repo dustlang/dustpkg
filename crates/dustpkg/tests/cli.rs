@@ -1,3 +1,13 @@
+// File: cli.rs - This file is part of the DPL Toolchain
+// Copyright (c) 2026 Dust LLC, and Contributors
+// Description:
+//   Test suite for dustpkg CLI functionality.
+//   Tests include:
+//     - init_creates_manifest: Test package initialization
+//     - add_dependency: Test adding dependencies
+//     - update_lock: Test lock file updates
+//     - build_package: Test package building
+
 use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use std::fs;
@@ -20,7 +30,10 @@ fn init_creates_manifest() {
     let manifest_path = tmp.path().join("Dust.toml");
     assert!(manifest_path.exists(), "Dust.toml should be created");
     let contents = fs::read_to_string(&manifest_path).unwrap();
-    assert!(contents.contains("[package]"), "manifest should contain [package] section");
+    assert!(
+        contents.contains("[package]"),
+        "manifest should contain [package] section"
+    );
 }
 
 #[test]
@@ -35,10 +48,16 @@ fn add_dependency_and_lock() {
     assert!(lock_path.exists());
     // Check manifest includes dependency
     let manifest = fs::read_to_string(&manifest_path).unwrap();
-    assert!(manifest.contains("serde"), "serde should be listed in dependencies");
+    assert!(
+        manifest.contains("serde"),
+        "serde should be listed in dependencies"
+    );
     // Check lock file includes dependency and checksum
     let lock = fs::read_to_string(&lock_path).unwrap();
-    assert!(lock.contains("name = \"serde\""), "lock should include serde");
+    assert!(
+        lock.contains("name = \"serde\""),
+        "lock should include serde"
+    );
     assert!(lock.contains("checksum"), "lock should include checksum");
 }
 
@@ -65,5 +84,8 @@ fn update_with_seed_produces_different_order() {
     run_dustpkg(&["update", "--seed", "42"], tmp.path()).success();
     let lock_seed42 = fs::read_to_string(tmp.path().join("dustpkg.lock")).unwrap();
     // If seed influences ordering, the two lock contents should differ
-    assert_ne!(lock_seed0, lock_seed42, "different seeds should produce different lock ordering");
+    assert_ne!(
+        lock_seed0, lock_seed42,
+        "different seeds should produce different lock ordering"
+    );
 }

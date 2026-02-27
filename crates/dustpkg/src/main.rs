@@ -1,3 +1,10 @@
+// File: main.rs - This file is part of the DPL Toolchain
+// Copyright (c) 2026 Dust LLC, and Contributors
+// Description:
+//   Executable entry point for `dustpkg` CLI tool.
+//   Provides interface around dustpkg::lib functionality.
+//   Supports subcommands: init, add, update, build, install, publish
+
 //! Executable entry point for the `dustpkg` command line tool.
 //!
 //! This binary provides a simple interface around the core
@@ -56,7 +63,11 @@ fn main() -> anyhow::Result<()> {
         Commands::Init => {
             init_package(&cwd)?;
         }
-        Commands::Add { name, version, seed } => {
+        Commands::Add {
+            name,
+            version,
+            seed,
+        } => {
             if !manifest_path.exists() {
                 anyhow::bail!("Dust.toml not found in {}", cwd.display());
             }

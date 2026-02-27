@@ -1,3 +1,13 @@
+// File: lib.rs - This file is part of the DPL Toolchain
+// Copyright (c) 2026 Dust LLC, and Contributors
+// Description:
+//   Core library for the `dustpkg` command line tool.
+//   Implements a package manager for Dust with:
+//     - Deterministic install plans in lock files
+//     - Exact versions and cryptographic hashes of dependencies
+//     - Reproducible builds guarantee
+//   Supports subcommands: init, add, remove, update, build, install, publish
+
 //! Core library for the `dustpkg` command line tool.
 //!
 //! This crate implements a simple package manager for the Dust
