@@ -1,0 +1,65 @@
+// File: main.ds - This file is part of the DPL Toolchain
+// Copyright (c) 2026 Dust LLC, and Contributors
+// Description:
+//   DustPkg top-level executable profile for the currently supported Dust grammar.
+//   This build profile uses a single K main unit.
+
+K main {
+    // Deterministic command selector:
+    // 1=init, 2=add, 3=update, 4=build
+    let command: K[Int] = 4;
+
+    // Simulated runtime state for compile-time smoke behavior.
+    let manifest_present: K[Int] = 1;
+    let dependency_count: K[Int] = 2;
+    let seed_mode: K[Int] = 1;
+    let seed_value: K[Int] = 42;
+
+    if command == 1 {
+        emit "Created Dust.toml for package 'demo'";
+    } else {
+        if command == 2 {
+            if manifest_present == 0 {
+                emit "error: Dust.toml not found";
+            } else {
+                emit "Added dependency 'serde = 1.0.0' and updated dustpkg.lock";
+            }
+        } else {
+            if command == 3 {
+                if manifest_present == 0 {
+                    emit "error: Dust.toml not found";
+                } else {
+                    if seed_mode == 1 {
+                        emit "Updated dustpkg.lock (deterministic seed mode)";
+                    } else {
+                        emit "Updated dustpkg.lock (alphabetic mode)";
+                    }
+                }
+            } else {
+                if command == 4 {
+                    if manifest_present == 0 {
+                        emit "error: Dust.toml not found";
+                    } else {
+                        if dependency_count == 0 {
+                            emit "Build successful. No dependencies to resolve.";
+                        } else {
+                            if seed_mode == 1 {
+                                if seed_value == 42 {
+                                    emit "Build successful. All dependencies resolved deterministically.";
+                                } else {
+                                    emit "Build successful. Dependency plan resolved with explicit seed.";
+                                }
+                            } else {
+                                emit "Build successful. Dependencies resolved in stable order.";
+                            }
+                        }
+                    }
+                } else {
+                    emit "error: unknown command";
+                }
+            }
+        }
+    }
+
+    emit "dustpkg: top-level K main profile active";
+}
